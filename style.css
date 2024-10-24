@@ -205,6 +205,7 @@ body {
     margin: -10px;
     flex-wrap: wrap;
     padding-top: 30px;
+    align-self: center;
 }
 
 .grid-item {
@@ -216,7 +217,7 @@ body {
     overflow: hidden;
     transition: transform 0.3s;
 }
-
+    
 .grid-item img {
     width: 100%;
     height: auto;
@@ -255,4 +256,182 @@ body {
 .grid-item h2 {
     font-size: 40px;
     text-align: center;
+}
+
+.btn-green {
+    background: linear-gradient(145deg, #3f9c3f, #2e732e); /* Gradient background */
+    border: none;
+    color: white;
+    padding: 10px 159px;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    box-shadow: 5px 5px 15px #a3c8a3, 
+                -5px -5px 15px #ffffff; /* Soft shadow */
+    transition: all 0.3s ease; /* Smooth transition */
+}
+
+.btn-green:hover {
+    box-shadow: 2px 2px 10px #a3c8a3,
+                -2px -2px 10px #ffffff; /* Reduced shadow on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+/* Contact us */
+
+
+.contact-section {
+    padding: 40px 20px; /* Spacing around the section */
+    background-color: #333; /* Light background color */
+    text-align: center; /* Center text */
+}
+
+.contact-section h2 {
+    margin-bottom: 20px; /* Space below the heading */
+    font-size: 2em; /* Size of the heading */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items */
+}
+
+label {
+    margin: 10px 0 5px; /* Space around labels */
+    font-weight: bold; /* Bold text */
+}
+
+input, textarea {
+    width: 100%; /* Full width */
+    max-width: 400px; /* Maximum width */
+    padding: 10px; /* Padding */
+    margin-bottom: 15px; /* Space below inputs */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 1em; /* Font size */
+}
+
+textarea {
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.btn-green {
+    background: linear-gradient(145deg, #3f9c3f, #2e732e); /* Gradient background */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition */
+}
+
+.btn-green:hover {
+    box-shadow: 2px 2px 10px #a3c8a3; /* Soft shadow on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+/* Blog page */
+
+.banner {
+    position: relative;
+    text-align: center;
+    color: white;
+    height: 70vh;
+    overflow: hidden;
+}
+.banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.banner .text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.banner .text h1 {
+    font-size: 48px;
+    margin: 0;
+}
+.banner .text p {
+    font-size: 18px;
+}
+.content {
+    padding: 20px;
+}
+.content .filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.content .filters .categories a {
+    text-decoration: none;
+    color: #333;
+    margin: 0 10px;
+}
+.content .filters .search {
+    position: relative;
+}
+.content .filters .search input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+.content .filters .search button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #6c5b7b;
+    border: none;
+    color: white;
+    padding: 0 15px;
+    border-radius: 0 5px 5px 0;
+}
+.content .articles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.content .articles .article {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: calc(33.333% - 20px);
+}
+.content .articles .article img {
+    width: 100%;
+    height: auto;
+}
+.content .articles .article .info {
+    padding: 15px;
+}
+.content .articles .article .info h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+}
+.content .articles .article .info p {
+    margin: 0 0 10px;
+    color: #666;
+}
+.content .articles .article .info .tags {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.content .articles .article .info .tags span {
+    background-color: #eee;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+.content .articles .article .info .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #999;
 }
