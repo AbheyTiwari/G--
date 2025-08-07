@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-वन - Grow with Nature</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Poppins and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
+    <!-- Removed Lottie Player CDN as it's no longer used for falling leaves -->
+    <!-- <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> -->
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Light Green 50 */
+            color: #14532d; /* Dark Green 900 */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+        .hero-bg {
+            background-image: url('hero.jpg');
+            background-size: cover;
+            background-position: center;
+            /* background-attachment: fixed; Removed for GSAP parallax */
+        }
+        .parallax-section {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+        .btn-neon-green {
+            background-color: #10B981; /* Neon Green */
+            color: #f0fdf4; /* Light Green 50 text on green button */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px; /* Full rounded for morphing effect */
+        }
+        .btn-neon-green:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+            transform: translateY(-2px);
+        }
+        .btn-neon-green::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: all 0.6s ease;
+        }
+        .btn-neon-green:hover::before {
+            left: 100%;
+        }
+        .hover-zoom:hover img {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+        }
+        /* Custom scrollbar for aesthetics - Light theme */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #dcfce7; /* Green 100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10B981; /* Neon green thumb */
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0e9f6e; /* Darker neon green on hover */
+        }
+        /* Styles for Lottie animation container (if still needed for other purposes) */
+        .lottie-logo-container {
+            width: 100px; /* Adjust size as needed */
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lottie-player-nav {
+            width: 40px; /* Smaller for nav bar */
+            height: 40px;
+        }
+        .qr-placeholder {
+            width: 180px; /* Increased size */
+            height: 180px; /* Increased size */
+            /* Removed background-color, font-size, color as it's for an image now */
+            /* background-color: #cbd5e1; */
+            /* font-size: 0.875rem; */
+            /* color: #475569; */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1rem; /* mb-4 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            overflow: hidden; /* Ensures image respects border-radius */
+        }
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the entire image is visible within the container */
+            border-radius: 0.5rem; /* Match parent rounded-lg */
+        }
+
+        /* New CSS for falling leaves animation */
+        .leaf-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden; /* Ensure leaves don't go beyond container */
+        }
+
+        .leaf {
+            position: absolute;
+            font-size: 1.5rem; /* Adjust leaf size */
+            color: #10B981; /* Neon green color for leaves */
+            opacity: 0.7;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            transform-origin: bottom center; /* For rotation */
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10%) translateX(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--leaf-drift)) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Modal specific styles */
+        .project-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .project-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .project-modal-content {
+            background-color: #ffffff; /* White background for content */
+            color: #14532d; /* Dark Green 900 text */
+            padding: 2.5rem; /* Increased padding */
+            border-radius: 1rem; /* More rounded corners for the modal itself */
+            max-width: 700px; /* Max width for larger screens */
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .project-modal.show .project-modal-content {
+            transform: scale(1);
+        }
+
+        .project-modal-content img {
+            width: 100%; /* Make image fill the width of the modal content */
+            height: 250px; /* Force a uniform height for all images */
+            object-fit: cover; /* Crop image to fit, maintaining aspect ratio */
+            border-radius: 0.75rem; /* Slightly more rounded corners for the image */
+            margin-bottom: 1.5rem; /* Increased margin below image */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Subtle shadow for the image */
+        }
+        .project-modal-content h3 {
+            font-size: 2.25rem; /* text-4xl equivalent */
+            line-height: 1.2;
+            margin-bottom: 1rem; /* Adjusted margin */
+        }
+        .project-modal-content p {
+            font-size: 1.125rem; /* text-lg equivalent */
+            line-height: 1.6;
+        }
+
+        .project-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            color: #14532d;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .project-modal-close:hover {
+            color: #10B981;
+        }
+    </style>
+</head>
+<body class="bg-green-50 text-green-900">
+
+    <!-- Header & Navigation -->
+    <header class="fixed top-[5px] left-1/2 -translate-x-1/2 w-[98%] max-w-7xl z-50 bg-green-50/70 backdrop-blur-3xl shadow-xl rounded-b-full px-6 py-4">
+        <nav class="container mx-auto flex justify-center items-center">
+            <!-- "G-वन" text removed from the nav bar as requested -->
+            <a href="#hero" class="text-2xl font-bold text-green-900 hover:text-green-600 transition duration-300 hidden" data-lang-key="orgName"></a> <!-- Hidden the empty link -->
+            <div class="flex space-x-8"> <!-- Changed from hidden md:flex to flex for centering -->
+                <a href="#hero" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navHome">Home</a>
+                <a href="#about" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navAbout">About Us</a>
+                <a href="#projects" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navProjects">Projects</a>
+                <a href="#gallery" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navGallery">Gallery</a>
+                <a href="#stay-connected" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navContact">Stay Connected</a>
+                <button id="lang-toggle" class="text-white bg-green-700 px-3 py-1 rounded-full text-sm hover:bg-green-600 transition duration-300">हिन्दी / ENG</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                <button id="lang-toggle-mobile" class="text-white bg-green-700 px-3 py-1 rounded-full text-sm mr-4 hover:bg-green-600 transition duration-300">हिन्दी / ENG</button>
+                <button id="mobile-menu-button" class="text-green-900 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-green-100 py-4 text-center"> <!-- Added text-center here -->
+            <a href="#hero" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navHome">Home</a>
+            <a href="#about" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navAbout">About Us</a>
+            <a href="#projects" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navProjects">Projects</a>
+            <a href="#gallery" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navGallery">Gallery</a>
+            <a href="#stay-connected" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navContact">Stay Connected</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-bg h-screen flex items-center justify-center text-center relative">
+            <div class="absolute inset-0 bg-black opacity-30 hero-overlay"></div> <!-- Slightly reduced opacity for light theme -->
+            <div class="relative z-10 p-8 rounded-2xl">
+                <h1 class="text-7xl md:text-9xl font-extrabold text-white mb-6 leading-tight tracking-wide drop-shadow-lg" data-lang-key="heroTitle">
+                    G-वन
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto" data-lang-key="heroSubtitle">
+                    An environmental student organization dedicated to nurturing nature.
+                </p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6">
+                    <a href="https://forms.gle/your-google-form-url" target="_blank" class="btn-neon-green px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-green-500/50" data-lang-key="ctaPlantTree">
+                        Plant a Tree Now
+                    </a>
+                    <button id="play-video-button" class="flex items-center space-x-3 text-white px-6 py-3 rounded-full border-2 border-white hover:border-green-400 hover:text-green-400 transition duration-300">
+                        <i class="fas fa-play-circle text-2xl"></i>
+                        <span class="text-lg font-medium" data-lang-key="ctaWatchVideo">Watch Awareness Video</span>
+                    </button>
+                </div>
+                <!-- New: QR Code and Join Orientation CTA -->
+                <div class="mt-12 flex flex-col items-center">
+                    <a href="https://forms.gle/MLpcZu49F6Hk9PDg8" target="_blank" class="qr-placeholder">
+                        <img src="qr.png" alt="Join Orientation QR Code" class="w-full h-full object-contain rounded-lg">
+                    </a>
+                    <br>
+                    <a href="https://forms.gle/MLpcZu49F6Hk9PDg8" target="_blank" class="btn-neon-green px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-green-500/50">
+                        Join Orientation
+                    </a>
+                </div>
+            </div>
+            <!-- Replaced Lottie with CSS falling leaves -->
+            <div class="leaf-container"></div>
+        </section>
+
+        <!-- Video Modal (Hidden by default) -->
+        <div id="video-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+            <div class="relative w-11/12 max-w-4xl bg-white rounded-lg shadow-lg p-4">
+                <button id="close-video-modal" class="absolute top-3 right-3 text-green-900 text-3xl hover:text-green-600 transition duration-300">&times;</button>
+                <div class="aspect-w-16 aspect-h-9">
+                    <!-- Placeholder for embedded video -->
+                    <iframe class="w-full h-full rounded-md" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- About G-वन Section -->
+        <section id="about" class="py-20 bg-green-100 text-center parallax-section" style="background-image: url('about_us.jpg');">
+            <div class="container mx-auto px-6">
+                <h2 class="text-5xl font-bold text-white mb-12 drop-shadow-md" data-lang-key="aboutTitle">About G-वन</h2>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-12 leading-relaxed text-white" data-lang-key="aboutMission">
+                    Inspired by the ancient wisdom, "<span class="font-bold text-white">प्रकृति रक्षति रक्षितः</span>" (Nature protects if protected), G-वन is a student-led environmental organization committed to fostering a sustainable future. We believe in active participation and community engagement to make a tangible difference.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10">
+                    <div class="bg-white p-8 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 about-card">
+                        <i class="fas fa-seedling text-6xl text-green-600 mb-6"></i>
+                        <h3 class="text-2xl font-semibold text-green-900 mb-4" data-lang-key="aboutCard1Title">Plantation Drives</h3>
+                        <p class="text-green-800" data-lang-key="aboutCard1Text">Organizing regular tree plantation campaigns to increase green cover and combat deforestation.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 about-card">
+                        <i class="fas fa-recycle text-6xl text-green-600 mb-6"></i>
+                        <h3 class="text-2xl font-semibold text-green-900 mb-4" data-lang-key="aboutCard2Title">Waste Management</h3>
+                        <p class="text-green-800" data-lang-key="aboutCard2Text">Promoting recycling, waste reduction, and responsible disposal through awareness programs.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 about-card">
+                        <i class="fas fa-hands-helping text-6xl text-green-600 mb-6"></i>
+                        <h3 class="text-2xl font-semibold text-green-900 mb-4" data-lang-key="aboutCard3Title">Community Engagement</h3>
+                        <p class="text-green-800" data-lang-key="about3Text">Engaging local communities and schools in environmental protection initiatives.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 bg-green-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-5xl font-bold text-green-700 mb-12 drop-shadow-md" data-lang-key="projectsTitle">Our Projects</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Project Card 1 -->
+                    <div class="bg-white rounded-lg shadow-xl overflow-hidden project-card transform hover:scale-105 transition duration-300">
+                        <img src="p1.jpg" alt="Wet Waste Management Project" class="w-full h-56 object-cover hover-zoom">
+                        <div class="p-8">
+                            <h3 class="text-3xl font-semibold text-green-900 mb-4" data-lang-key="project1Title">Wet Waste Management Project</h3>
+                            <p class="text-green-800 mb-6" data-lang-key="project1Summary"></p>
+                            <button class="btn-neon-green px-6 py-3 text-md font-semibold open-project-modal" data-project-id="project1" data-lang-key="learnMore">Learn More</button>
+                        </div>
+                    </div>
+                    <!-- Project Card 2 -->
+                    <div class="bg-white rounded-lg shadow-xl overflow-hidden project-card transform hover:scale-105 transition duration-300">
+                        <img src="p4.jpeg" alt="Paper Waste Collection Project" class="w-full h-56 object-cover hover-zoom">
+                        <div class="p-8">
+                            <h3 class="text-3xl font-semibold text-green-900 mb-4" data-lang-key="project2Title">Paper Waste Collection Project</h3>
+                            <p class="text-green-800 mb-6" data-lang-key="project2Summary"></p>
+                            <button class="btn-neon-green px-6 py-3 text-md font-semibold open-project-modal" data-project-id="project2" data-lang-key="learnMore">Learn More</button>
+                        </div>
+                    </div>
+                    <!-- Project Card 3 -->
+                    <div class="bg-white rounded-lg shadow-xl overflow-hidden project-card transform hover:scale-105 transition duration-300">
+                        <img src="p3.jpg" alt="Cloth Collection & Donation Drive" class="w-full h-56 object-cover hover-zoom">
+                        <div class="p-8">
+                            <h3 class="text-3xl font-semibold text-green-900 mb-4" data-lang-key="project3Title">Cloth Collection & Donation Drive</h3>
+                            <p class="text-green-800 mb-6" data-lang-key="project3Summary"></p>
+                            <button class="btn-neon-green px-6 py-3 text-md font-semibold open-project-modal" data-project-id="project3" data-lang-key="learnMore">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photo Gallery Section -->
+        <section id="gallery" class="py-20 bg-green-100 parallax-section" style="background-image: url('gallery.png');">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-5xl font-bold text-green-700 mb-12 drop-shadow-md" data-lang-key="galleryTitle">Our Moments</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    <!-- Gallery Item 1 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/4CAF50/ffffff?text=Planting+Trees" alt="Planting Trees" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery1Caption">Planting Drive 2023</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 2 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/8BC34A/ffffff?text=Community+Cleanup" alt="Community Cleanup" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery2Caption">Community Cleanup</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 3 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/689F38/ffffff?text=Eco+Workshop" alt="Eco Workshop" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery3Caption">Eco Workshop</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 4 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/388E3C/ffffff?text=Nature+Walk" alt="Nature Walk" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery4Caption">Nature Walk</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 5 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/1B5E20/ffffff?text=Volunteer+Work" alt="Volunteer Work" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery5Caption">Volunteer Work</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 6 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/004D40/ffffff?text=Awareness+Campaign" alt="Awareness Campaign" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:opacity-100 transition-opacity duration-500">
+                        <p class="text-white text-lg font-semibold" data-lang-key="gallery6Caption">Awareness Campaign</p>
+                    </div>
+                    <!-- Gallery Item 7 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/4CAF50/ffffff?text=New+Image+7" alt="New Image 7" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery7Caption">New Activity 1</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 8 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/8BC34A/ffffff?text=New+Image+8" alt="New Image 8" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery8Caption">New Activity 2</p>
+                        </div>
+                    </div>
+                    <!-- Gallery Item 9 -->
+                    <div class="relative group rounded-lg overflow-hidden shadow-lg gallery-item">
+                        <img src="https://placehold.co/400x300/689F38/ffffff?text=New+Image+9" alt="New Image 9" class="w-full h-56 object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p class="text-white text-lg font-semibold" data-lang-key="gallery9Caption">New Activity 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New: Stay Connected Section -->
+        <section id="stay-connected" class="py-20 bg-green-50 text-center">
+            <div class="container mx-auto px-6">
+                <h2 class="text-5xl font-bold text-green-700 mb-12 drop-shadow-md">Stay Connected</h2>
+                <div class="max-w-xl mx-auto bg-white p-10 rounded-lg shadow-xl">
+                    <a href="https://www.instagram.com/macenvironmentcell?igsh=MTFlcWtieW96YnR4bw==" target="_blank" class="inline-block mb-6">
+                        <i class="fab fa-instagram text-6xl text-pink-600 hover:text-pink-700 transition duration-300"></i>
+                    </a>
+                    <p class="text-lg md:text-xl text-green-800 mb-4">
+                        Follow us on Instagram for behind-the-scenes and updates!
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-green-900 py-10 text-center text-white">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="https://www.instagram.com/macenvironmentcell?igsh=MTFlcWtieW96YnR4bw==" target="_blank" class="text-white hover:text-pink-400 transition duration-300 text-2xl">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <!-- Add more social media icons as needed -->
+                <!-- Example: <a href="#" class="text-white hover:text-blue-400 transition duration-300 text-2xl"><i class="fab fa-facebook"></i></a> -->
+                <!-- Example: <a href="#" class="text-white hover:text-blue-200 transition duration-300 text-2xl"><i class="fab fa-twitter"></i></a> -->
+            </div>
+            <p class="text-sm">&copy; 2024 G-वन. All rights reserved.</p>
+            <p class="text-sm mt-1">Maharaja Agrasen College, University of Delhi</p>
+        </div>
+    </footer>
+
+    <!-- Project Modal Structure -->
+    <div id="project-detail-modal" class="project-modal">
+        <div class="project-modal-content">
+            <button class="project-modal-close">&times;</button>
+            <img id="modal-project-image" src="" alt="Project Image">
+            <h3 id="modal-project-title" class="text-3xl font-bold mb-4"></h3>
+            <p id="modal-project-description" class="text-lg leading-relaxed"></p>
+        </div>
+    </div>
+
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Language data
+        const translations = {
+            en: {
+                orgName: "", // Removed text
+                navHome: "Home",
+                navAbout: "About Us",
+                navProjects: "Projects",
+                navGallery: "Gallery",
+                navContact: "Stay Connected", // Updated nav link text
+                heroTitle: "G-वन",
+                heroSubtitle: "An environmental student organization dedicated to nurturing nature.",
+                ctaPlantTree: "Plant a Tree Now",
+                ctaWatchVideo: "Watch Awareness Video",
+                aboutTitle: "About G-वन",
+                aboutMission: `Inspired by the ancient wisdom, "<span class="font-bold text-white">प्रकृति रक्षति रक्षितः</span>" (Nature protects if protected), G-वन is a student-led environmental organization committed to fostering a sustainable future. We believe in active participation and community engagement to make a tangible difference.`,
+                aboutCard1Title: "Plantation Drives",
+                aboutCard1Text: "Organizing regular tree plantation campaigns to increase green cover and combat deforestation.",
+                aboutCard2Title: "Waste Management",
+                aboutCard2Text: "Promoting recycling, waste reduction, and responsible disposal through awareness programs.",
+                aboutCard3Title: "Community Engagement",
+                aboutCard3Text: "Engaging local communities and schools in environmental protection initiatives.",
+                projectsTitle: "Our Projects",
+                projects: {
+                    project1: {
+                        title: "Wet Waste Management Project",
+                        summary: "Our society, G-वन, initiated a Wet Waste Management Project in collaboration with IPCA, installing six Aerobins on campus to process wet waste.",
+                        fullText: `In a significant stride towards sustainable waste management and environmental stewardship, our society, *G-वन, initiated a **Wet Waste Management Project* in collaboration with the *Indian Pollution Control Association (IPCA). As part of this initiative, **six Aerobins* were installed on our college campus to handle and process wet waste effectively.
+
+These state-of-the-art *Aerobins* were generously provided by *IPCA, a leading organization dedicated to promoting responsible waste disposal and resource recovery. These composting units are designed to convert organic waste into nutrient-rich compost through **aerobic decomposition*, helping reduce the volume of wet waste generated within the college premises.
+
+The *official inauguration* of the Aerobins was held on campus in the esteemed presence of *Mr. Ashish Jain, the **Founder and Director of IPCA, and **Prof. Sanjeev Kumar Tiwari, our respected **College Principal*. Their presence underscored the significance of student-led environmental initiatives and reaffirmed the shared commitment towards a cleaner and greener future.
+
+Since the implementation of this project, our campus has witnessed a *remarkable reduction in wet waste accumulation, both **inside and around* the college. The regular usage and management of these bins by society members and volunteers have contributed significantly to *maintaining cleanliness, **promoting awareness among students, and **reducing the environmental footprint* of the campus.
+
+This initiative has played a pivotal role in our institution being recognized as a *Zero Waste Campus*, showcasing the impact of collective action, innovation, and community responsibility in achieving sustainability goals.`,
+                        image: "p1.jpg"
+                    },
+                    project2: {
+                        title: "Paper Waste Collection Project",
+                        summary: "G-वन Society launched the Paper Waste Collection Project, collecting paper from departments for recycling into usable paper rims by Jagruti.",
+                        fullText: `In our continued efforts to build a sustainable and eco-conscious campus, G-वन Society launched the Paper Waste Collection Project. Through this initiative, paper waste is collected from various departments and societies across the college on a regular basis.
+
+The collected paper is then handed over to Jagruti, a trusted recycling partner, which processes the waste paper into usable paper rims (reams). These recycled rims are then redistributed to college departments, promoting a circular system of resource use and minimizing the need for freshly manufactured paper.
+
+This project not only helps in reducing paper waste and saving trees, but also raises awareness among students and faculty about the importance of recycling and resource efficiency. It has become a practical model for turning waste into a valuable academic resource, reinforcing our vision of a zero-waste, environmentally responsible campus.`,
+                        image: "p4.jpeg"
+                    },
+                    project3: {
+                        title: "Cloth Collection & Donation Drive",
+                        summary: "G-वन Society organized a Cloth Collection and Donation Drive, collecting used clothes for donation and repurposing.",
+                        fullText: `As part of our commitment to sustainability and social responsibility, G-वन Society organized a Cloth Collection and Donation Drive. In this initiative, students and faculty members contributed their gently used clothes, which were then carefully sorted by our team.
+
+Usable clothes were donated to the underprivileged, ensuring they reached those in genuine need. Clothes that were unfit for donation were repurposed creatively—transformed into eco-friendly cloth bags and other useful items, promoting reuse and reducing textile waste.
+
+This drive not only helped support the needy but also encouraged conscious consumption, waste reduction, and upcycling on campus. It served as a strong reminder that small acts of kindness and sustainability can go hand in hand to create meaningful change.`,
+                        image: "p3.jpg"
+                    }
+                },
+                learnMore: "Learn More",
+                galleryTitle: "Our Moments",
+                gallery1Caption: "Planting Drive 2023",
+                gallery2Caption: "Community Cleanup",
+                gallery3Caption: "Eco Workshop",
+                gallery4Caption: "Nature Walk",
+                gallery5Caption: "Volunteer Work",
+                gallery6Caption: "Awareness Campaign",
+                gallery7Caption: "New Activity 1",
+                gallery8Caption: "New Activity 2",
+                gallery9Caption: "New Activity 3",
+                contactTitle: "Connect With Us", // This is now for Stay Connected section title
+                formName: "Name", // These are no longer used but kept in translations for consistency
+                formEmail: "Email",
+                formMessage: "Message",
+                formSend: "Send Message",
+                footerCopyright: "&copy; 2024 G-वन. All rights reserved.",
+                footerTagline: "Inspired by Nature, Driven by Action."
+            },
+            hi: {
+                orgName: "", // Removed text
+                navHome: "मुख्य पृष्ठ",
+                navAbout: "हमारे बारे में",
+                navProjects: "परियोजनाएं",
+                navGallery: "गैलरी",
+                navContact: "जुड़े रहें", // Updated nav link text
+                heroTitle: "जी-वन",
+                heroSubtitle: "प्रकृति के पोषण के लिए समर्पित एक पर्यावरण छात्र संगठन।",
+                ctaPlantTree: "अभी एक पेड़ लगाएं",
+                ctaWatchVideo: "जागरूकता वीडियो देखें",
+                aboutTitle: "जी-वन के बारे में",
+                aboutMission: `प्राचीन ज्ञान से प्रेरित, "<span class="font-bold text-white">प्रकृति रक्षति रक्षितः</span>" (प्रकृति रक्षा करती है यदि उसकी रक्षा की जाए), जी-वन एक छात्र-नेतृत्व वाला पर्यावरण संगठन है जो एक स्थायी भविष्य को बढ़ावा देने के लिए प्रतिबद्ध है। हम ठोस बदलाव लाने के लिए सक्रिय भागीदारी और सामुदायिक जुड़ाव में विश्वास करते हैं।`,
+                aboutCard1Title: "वृक्षारोपण अभियान",
+                aboutCard1Text: "हरियाली बढ़ाने और वनों की कटाई से निपटने के लिए नियमित वृक्षारोपण अभियान आयोजित करना।",
+                aboutCard2Title: "अपशिष्ट प्रबंधन",
+                aboutCard2Text: "जागरूकता कार्यक्रमों के माध्यम से रीसाइक्लिंग, अपशिष्ट में कमी और जिम्मेदार निपटान को बढ़ावा देना।",
+                aboutCard3Title: "सामुदायिक जुड़ाव",
+                aboutCard3Text: "पर्यावरण संरक्षण पहलों में स्थानीय समुदायों और स्कूलों को शामिल करना।",
+                projectsTitle: "हमारी परियोजनाएं",
+                projects: {
+                    project1: {
+                        title: "गीले कचरे का प्रबंधन परियोजना",
+                        summary: "हमारा समाज, जी-वन, आईपीसीए के सहयोग से एक गीले कचरे का प्रबंधन परियोजना शुरू की, जिसमें गीले कचरे को संसाधित करने के लिए छह एयरोबिन स्थापित किए गए।",
+                        fullText: `स्थायी अपशिष्ट प्रबंधन और पर्यावरणीयT stewardship की दिशा में एक महत्वपूर्ण कदम के रूप में, हमारे समाज, *G-वन, ने *भारतीय प्रदूषण नियंत्रण संघ (IPCA)* के सहयोग से एक **गीले कचरे का प्रबंधन परियोजना* शुरू की। इस पहल के तहत, कॉलेज परिसर में गीले कचरे को प्रभावी ढंग से संभालने और संसाधित करने के लिए **छह एयरोबिन* स्थापित किए गए।
+
+ये अत्याधुनिक *एयरोबिन* *आईपीसीए* द्वारा उदारतापूर्वक प्रदान किए गए थे, जो जिम्मेदार अपशिष्ट निपटान और संसाधन पुनर्प्राप्ति को बढ़ावा देने के लिए समर्पित एक अग्रणी संगठन है। ये खाद इकाइयां **एरोबिक अपघटन* के माध्यम से जैविक कचरे को पोषक तत्वों से भरपूर खाद में बदलने के लिए डिज़ाइन की गई हैं, जिससे कॉलेज परिसर के भीतर उत्पन्न गीले कचरे की मात्रा को कम करने में मदद मिलती है।
+
+एयरोबिन का *आधिकारिक उद्घाटन* परिसर में *श्री आशीष जैन, आईपीसीए के **संस्थापक और निदेशक, और **प्रोफेसर संजीव कुमार तिवारी, हमारे सम्मानित **कॉलेज प्रिंसिपल* की गरिमामय उपस्थिति में आयोजित किया गया था। उनकी उपस्थिति ने छात्र-नेतृत्व वाली पर्यावरणीय पहलों के महत्व को रेखांकित किया और एक स्वच्छ और हरित भविष्य के प्रति साझा प्रतिबद्धता की पुष्टि की।
+
+इस परियोजना के कार्यान्वयन के बाद से, हमारे परिसर में कॉलेज के **अंदर और आसपास दोनों जगह* गीले कचरे के संचय में *उल्लेखनीय कमी* देखी गई है। समाज के सदस्यों और स्वयंसेसेवकों द्वारा इन डिब्बे के नियमित उपयोग और प्रबंधन ने परिसर की *स्वच्छता बनाए रखने, **छात्रों के बीच जागरूकता को बढ़ावा देने, और **परिसर के पर्यावरणीय पदचिह्न को कम करने* में महत्वपूर्ण योगदान दिया है।
+
+इस पहल ने हमारे संस्थान को *जीरो वेस्ट कैंपस* के रूप में मान्यता दिलाने में महत्वपूर्ण भूमिका निभाई है, जो स्थिरता लक्ष्यों को प्राप्त करने में सामूहिक कार्रवाई, नवाचार और सामुदायिक जिम्मेदारी के प्रभाव को प्रदर्शित करता है।`,
+                        image: "p1.jpg"
+                    },
+                    project2: {
+                        title: "कागज अपशिष्ट संग्रह परियोजना",
+                        summary: "जी-वन सोसाइटी ने कागज अपशिष्ट संग्रह परियोजना शुरू की, जिसमें विभागों से कागज एकत्र कर जागृति द्वारा पुनर्चक्रण कर उपयोगी कागज रिम बनाए जाते हैं।",
+                        fullText: `एक स्थायी और पर्यावरण-जागरूक परिसर बनाने के हमारे निरंतर प्रयासों में, जी-वन सोसाइटी ने कागज अपशिष्ट संग्रह परियोजना शुरू की। इस पहल के माध्यम से, कॉलेज भर के विभिन्न विभागों और समाजों से नियमित आधार पर कागज अपशिष्ट एकत्र किया जाता है।
+
+एकत्रित कागज को फिर जागृति को सौंप दिया जाता है, जो एक विश्वसनीय पुनर्चक्रण भागीदार है, जो अपशिष्ट कागज को उपयोग योग्य कागज रिम (रीम) में संसाधित करता है। इन पुनर्नवीनीकरण रिम को फिर कॉलेज के विभागों में पुनर्वितरित किया जाता है, जिससे संसाधन उपयोग की एक चक्रीय प्रणाली को बढ़ावा मिलता है और नए सिरे से निर्मित कागज की आवश्यकता कम हो जाती है।
+
+यह परियोजना न केवल कागज के कचरे को कम करने और पेड़ों को बचाने में मदद करती है, बल्कि छात्रों और संकाय के बीच पुनर्चक्रण और संसाधन दक्षता के महत्व के बारे में जागरूकता भी बढ़ाती है। यह एक शून्य-अपशिष्ट, पर्यावरण के प्रति जिम्मेदार परिसर के हमारे दृष्टिकोण को मजबूत करते हुए, कचरे को एक मूल्यवान अकादमिक संसाधन में बदलने के लिए एक व्यावहारिक मॉडल बन गया है।`,
+                        image: "p4.jpeg"
+                    },
+                    project3: {
+                        title: "वस्त्र संग्रह और दान अभियान",
+                        summary: "जी-वन सोसाइटी ने एक वस्त्र संग्रह और दान अभियान का आयोजन किया, जिसमें दान और पुनरुत्पादन के लिए उपयोग किए गए कपड़े एकत्र किए गए।",
+                        fullText: `स्थिरता और सामाजिक जिम्मेदारी के प्रति हमारी प्रतिबद्धता के हिस्से के रूप में, जी-वन सोसाइटी ने एक वस्त्र संग्रह और दान अभियान का आयोजन किया। इस पहल में, छात्रों और संकाय सदस्यों ने अपने हल्के उपयोग किए गए कपड़ों का योगदान दिया, जिन्हें हमारी टीम द्वारा सावधानीपूर्वक छांटा गया।
+
+उपयोग योग्य कपड़े जरूरतमंदों को दान किए गए, यह सुनिश्चित करते हुए कि वे वास्तविक जरूरत वाले लोगों तक पहुंचें। जो कपड़े दान के लिए अनुपयुक्त थे, उन्हें रचनात्मक रूप से पुन: उपयोग किया गया - उन्हें पर्यावरण के अनुकूल कपड़े के बैग और अन्य उपयोगी वस्तुओं में बदल दिया गया, जिससे पुन: उपयोग को बढ़ावा मिला और कपड़ा कचरा कम हुआ।
+
+इस अभियान ने न केवल जरूरतमंदों का समर्थन करने में मदद की, बल्कि परिसर में सचेत उपभोग, अपशिष्ट में कमी और अपसाइक्लिंग को भी प्रोत्साहित किया। इसने एक मजबूत अनुस्मारक के रूप में कार्य किया कि छोटे-छोटे दयालुता और स्थिरता के कार्य सार्थक परिवर्तन बनाने के लिए एक साथ चल सकते हैं।`,
+                        image: "p3.jpg"
+                    }
+                },
+                learnMore: "Learn More",
+                galleryTitle: "हमारे पल",
+                gallery1Caption: "वृक्षारोपण अभियान 2023",
+                gallery2Caption: "सामुदायिक सफाई",
+                gallery3Caption: "पारिस्थितिक कार्यशाला",
+                gallery4Caption: "प्रकृति की सैर",
+                gallery5Caption: "स्वयंसेवक कार्य",
+                gallery6Caption: "जागरूकता अभियान",
+                gallery7Caption: "नई गतिविधि 1",
+                gallery8Caption: "नई गतिविधि 2",
+                gallery9Caption: "नई गतिविधि 3",
+                contactTitle: "हमसे जुड़ें", // This is now for Stay Connected section title
+                formName: "नाम",
+                formEmail: "ईमेल",
+                formMessage: "संदेश",
+                formSend: "संदेश भेजें",
+                footerCopyright: "&copy; 2024 जी-वन। सर्वाधिकार सुरक्षित।",
+                footerTagline: "प्रकृति से प्रेरित, कर्म से संचालित।"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function updateContent() {
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[currentLang][key] !== undefined) { // Check for undefined to allow empty strings
+                    element.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            // Update project card summaries
+            if (translations[currentLang].projects) {
+                document.querySelectorAll('.project-card').forEach(card => {
+                    const projectId = card.querySelector('.open-project-modal').getAttribute('data-project-id');
+                    if (translations[currentLang].projects[projectId] && translations[currentLang].projects[projectId].summary) {
+                        card.querySelector(`[data-lang-key="${projectId}Summary"]`).innerHTML = translations[currentLang].projects[projectId].summary;
+                    }
+                });
+            }
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            updateContent();
+        });
+
+        document.getElementById('lang-toggle-mobile').addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            updateContent();
+        });
+
+        // Initial content update
+        updateContent();
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                gsap.to(window, {duration: 1, scrollTo: targetId, ease: "power2.inOut"});
+
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // GSAP Animations
+        // Hero Section elements fade-in
+        gsap.from(".hero-bg h1", { opacity: 0, y: 50, duration: 1.5, ease: "power3.out" });
+        gsap.from(".hero-bg p", { opacity: 0, y: 50, duration: 1.5, delay: 0.3, ease: "power3.out" });
+        gsap.from(".hero-bg .btn-neon-green", { opacity: 0, y: 50, duration: 1.5, delay: 0.6, ease: "power3.out" });
+        gsap.from(".hero-bg #play-video-button", { opacity: 0, y: 50, duration: 1.5, delay: 0.9, ease: "power3.out" });
+
+        // Parallax effect for hero background
+        gsap.to(".hero-bg", {
+            backgroundPositionY: "20%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // Parallax for about section background
+        gsap.to("#about.parallax-section", {
+            backgroundPositionY: "20%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#about",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // Parallax for gallery section background
+        gsap.to("#gallery.parallax-section", {
+            backgroundPositionY: "20%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#gallery",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // Scroll reveal for sections and cards using GSAP ScrollTrigger.batch
+        gsap.utils.toArray(".about-card, .project-card, .gallery-item, #about h2, #about p, #projects h2, #gallery h2, #stay-connected h2, #stay-connected .max-w-xl").forEach(element => {
+            gsap.from(element, {
+                opacity: 0,
+                y: 100,
+                ease: "power2.out",
+                duration: 1.2,
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 85%", // When 85% of the element is in view
+                    end: "bottom top",
+                    toggleActions: "play none none none",
+                    // markers: true // Uncomment for debugging scroll triggers
+                }
+            });
+        });
+
+        // Button Micro-interactions (Bounce/Morph)
+        document.querySelectorAll('.btn-neon-green').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                gsap.to(button, {
+                    scale: 1.05,
+                    duration: 0.2,
+                    ease: "back.out(1.7)",
+                    overwrite: "auto"
+                });
+            });
+            button.addEventListener('mouseleave', () => {
+                gsap.to(button, {
+                    scale: 1,
+                    duration: 0.2,
+                    ease: "power2.out",
+                    overwrite: "auto"
+                });
+            });
+        });
+
+        // Video Modal Functionality
+        const playVideoButton = document.getElementById('play-video-button');
+        const videoModal = document.getElementById('video-modal');
+        const closeVideoModal = document.getElementById('close-video-modal');
+        const videoIframe = videoModal.querySelector('iframe');
+
+        playVideoButton.addEventListener('click', () => {
+            videoModal.classList.remove('hidden');
+            // Ensure video autoplay works
+            videoIframe.src = videoIframe.src.replace('autoplay=0', 'autoplay=1');
+        });
+
+        closeVideoModal.addEventListener('click', () => {
+            videoModal.classList.add('hidden');
+            // Pause video when closing modal
+            videoIframe.src = videoIframe.src.replace('autoplay=1', 'autoplay=0');
+        });
+
+        // Close modal when clicking outside of it
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                videoModal.classList.add('hidden');
+                videoIframe.src = videoIframe.src.replace('autoplay=1', 'autoplay=0');
+            }
+        });
+
+        // Project Modal Functionality
+        const projectModal = document.getElementById('project-detail-modal');
+        const modalProjectImage = document.getElementById('modal-project-image');
+        const modalProjectTitle = document.getElementById('modal-project-title');
+        const modalProjectDescription = document.getElementById('modal-project-description');
+        const closeProjectModalButton = document.querySelector('.project-modal-close');
+
+        document.querySelectorAll('.open-project-modal').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const projectId = e.currentTarget.getAttribute('data-project-id');
+                const projectData = translations[currentLang].projects[projectId];
+
+                if (projectData) {
+                    modalProjectImage.src = projectData.image;
+                    modalProjectImage.alt = projectData.title;
+                    modalProjectTitle.textContent = projectData.title;
+                    modalProjectDescription.innerHTML = projectData.fullText; // Use innerHTML to preserve bold/italic from markdown
+                    projectModal.classList.add('show');
+                }
+            });
+        });
+
+        closeProjectModalButton.addEventListener('click', () => {
+            projectModal.classList.remove('show');
+        });
+
+        projectModal.addEventListener('click', (e) => {
+            if (e.target === projectModal) {
+                projectModal.classList.add('hidden'); // Use hidden to remove from display
+            }
+        });
+
+
+        // CSS-based falling leaves animation implementation
+        function createLeaf() {
+            const leaf = document.createElement('div');
+            leaf.classList.add('leaf');
+            // Using a Unicode leaf character for simplicity and light weight
+            const leafShapes = ['&#10022;', '&#127809;', '&#127810;']; // Some leaf-like Unicode characters
+            leaf.innerHTML = leafShapes[Math.floor(Math.random() * leafShapes.length)];
+            
+            const startX = Math.random() * 100;
+            leaf.style.left = `${startX}vw`;
+            leaf.style.top = `-20px`; // Start above the viewport
+
+            const animationDuration = Math.random() * 5 + 5; // 5-10 seconds
+            const animationDelay = Math.random() * 5; // 0-5 seconds delay
+            const driftAmount = Math.random() * 200 - 100; // -100 to 100px horizontal drift
+
+            leaf.style.animationDuration = `${animationDuration}s`;
+            leaf.style.animationDelay = `${animationDelay}s`;
+            leaf.style.setProperty('--leaf-drift', `${driftAmount}px`);
+
+            document.querySelector('.leaf-container').appendChild(leaf);
+
+            // Remove leaf after animation to prevent DOM bloat and recreate
+            leaf.addEventListener('animationend', () => {
+                leaf.remove();
+                createLeaf(); // Create a new leaf to maintain continuous animation
+            });
+        }
+
+        // Create a number of leaves on load
+        const numberOfLeaves = 30; // Adjust as needed for density
+        for (let i = 0; i < numberOfLeaves; i++) {
+            createLeaf();
+        }
+
+    </script>
+</body>
+</html>
