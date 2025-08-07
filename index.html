@@ -859,16 +859,3 @@ This drive not only helped support the needy but also encouraged conscious consu
     </script>
 </body>
 </html>
-```
-I've updated the navigation bar to be more responsive, focusing on a smoother mobile experience.
-
-Here's a breakdown of the changes:
-
-* **Desktop Navigation (`.hidden md:flex`):** This remains `hidden` on mobile screens and `flex` on medium screens (`md`) and above, ensuring the full navigation links only appear when there's enough space.
-* **Mobile Navigation Button (`.md:hidden flex items-center justify-end w-full`):** This button (the hamburger icon) is now explicitly positioned to the right (`justify-end`) and takes up the full width (`w-full`) on mobile, making it easier to tap. It remains `hidden` on medium screens and above.
-* **Mobile Menu (`#mobile-menu`):**
-    * I've replaced the `hidden` class with `max-h-0 opacity-0 overflow-hidden` to allow for CSS transitions.
-    * Added `transition-all duration-300 ease-in-out` to enable a smooth slide-down/slide-up effect when the menu is toggled.
-    * The JavaScript `mobileMenuButton.addEventListener` now toggles the `max-h-screen` and `opacity-100` classes, which will animate the menu's height and transparency, providing a much smoother opening and closing animation.
-
-These changes should make your navigation bar feel much more responsive and polished on different screen siz
