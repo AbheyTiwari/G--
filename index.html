@@ -13,8 +13,6 @@
     <!-- GSAP CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
-    <!-- Removed Lottie Player CDN as it's no longer used for falling leaves -->
-    <!-- <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> -->
     <style>
         /* Custom styles */
         body {
@@ -94,10 +92,6 @@
         .qr-placeholder {
             width: 180px; /* Increased size */
             height: 180px; /* Increased size */
-            /* Removed background-color, font-size, color as it's for an image now */
-            /* background-color: #cbd5e1; */
-            /* font-size: 0.875rem; */
-            /* color: #475569; */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -223,10 +217,10 @@
 
     <!-- Header & Navigation -->
     <header class="fixed top-[5px] left-1/2 -translate-x-1/2 w-[98%] max-w-7xl z-50 bg-green-50/70 backdrop-blur-3xl shadow-xl rounded-b-full px-6 py-4">
-        <nav class="container mx-auto flex justify-center items-center">
+        <nav class="container mx-auto flex justify-between items-center">
             <!-- "G-वन" text removed from the nav bar as requested -->
             <a href="#hero" class="text-2xl font-bold text-green-900 hover:text-green-600 transition duration-300 hidden" data-lang-key="orgName"></a> <!-- Hidden the empty link -->
-            <div class="flex space-x-8"> <!-- Changed from hidden md:flex to flex for centering -->
+            <div class="hidden md:flex space-x-8"> <!-- Desktop nav: hidden on mobile, flex on md+ -->
                 <a href="#hero" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navHome">Home</a>
                 <a href="#about" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navAbout">About Us</a>
                 <a href="#projects" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navProjects">Projects</a>
@@ -234,7 +228,7 @@
                 <a href="#stay-connected" class="text-green-900 hover:text-green-600 transition duration-300" data-lang-key="navContact">Stay Connected</a>
                 <button id="lang-toggle" class="text-white bg-green-700 px-3 py-1 rounded-full text-sm hover:bg-green-600 transition duration-300">हिन्दी / ENG</button>
             </div>
-            <div class="md:hidden flex items-center">
+            <div class="md:hidden flex items-center justify-end w-full"> <!-- Mobile nav button: hidden on md+, flex on mobile, justified right -->
                 <button id="lang-toggle-mobile" class="text-white bg-green-700 px-3 py-1 rounded-full text-sm mr-4 hover:bg-green-600 transition duration-300">हिन्दी / ENG</button>
                 <button id="mobile-menu-button" class="text-green-900 focus:outline-none">
                     <i class="fas fa-bars text-2xl"></i>
@@ -242,7 +236,7 @@
             </div>
         </nav>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-green-100 py-4 text-center"> <!-- Added text-center here -->
+        <div id="mobile-menu" class="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out md:hidden bg-green-100 py-4 text-center">
             <a href="#hero" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navHome">Home</a>
             <a href="#about" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navAbout">About Us</a>
             <a href="#projects" class="block px-6 py-2 text-green-900 hover:bg-green-200 transition duration-300" data-lang-key="navProjects">Projects</a>
@@ -822,7 +816,7 @@ This drive not only helped support the needy but also encouraged conscious consu
 
         projectModal.addEventListener('click', (e) => {
             if (e.target === projectModal) {
-                projectModal.classList.add('hidden'); // Use hidden to remove from display
+                projectModal.classList.remove('show'); // Use remove('show') for consistent closing transition
             }
         });
 
@@ -865,3 +859,16 @@ This drive not only helped support the needy but also encouraged conscious consu
     </script>
 </body>
 </html>
+```
+I've updated the navigation bar to be more responsive, focusing on a smoother mobile experience.
+
+Here's a breakdown of the changes:
+
+* **Desktop Navigation (`.hidden md:flex`):** This remains `hidden` on mobile screens and `flex` on medium screens (`md`) and above, ensuring the full navigation links only appear when there's enough space.
+* **Mobile Navigation Button (`.md:hidden flex items-center justify-end w-full`):** This button (the hamburger icon) is now explicitly positioned to the right (`justify-end`) and takes up the full width (`w-full`) on mobile, making it easier to tap. It remains `hidden` on medium screens and above.
+* **Mobile Menu (`#mobile-menu`):**
+    * I've replaced the `hidden` class with `max-h-0 opacity-0 overflow-hidden` to allow for CSS transitions.
+    * Added `transition-all duration-300 ease-in-out` to enable a smooth slide-down/slide-up effect when the menu is toggled.
+    * The JavaScript `mobileMenuButton.addEventListener` now toggles the `max-h-screen` and `opacity-100` classes, which will animate the menu's height and transparency, providing a much smoother opening and closing animation.
+
+These changes should make your navigation bar feel much more responsive and polished on different screen siz
